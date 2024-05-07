@@ -8,6 +8,7 @@ import Generate from '@/modules/generate'
 import History from '@/modules/generate/history'
 
 export const maxDuration = 30
+export const runtime = 'edge';
 
 export default async function Models({ params }: { params: { slug: string } }) {
   const { slug } = params

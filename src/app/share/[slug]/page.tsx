@@ -3,6 +3,8 @@ import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 
+export const runtime = 'edge';
+
 export default function Share({ params }: { params: { slug: string } }) {
   const { slug } = params
 
