@@ -1,6 +1,7 @@
 'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { zkSyncSepoliaTestnet } from 'viem/chains'
 import { createConfig, http, WagmiProvider } from 'wagmi'
 import { mainnet } from 'wagmi/chains'
 
@@ -34,8 +35,10 @@ const connectors = connectorsForWallets(
 
 const config = createConfig({
   connectors,
-  chains: [mainnet],
+  chains: [mainnet, zkSyncSepoliaTestnet],
   transports: {
+    // http,
+    [zkSyncSepoliaTestnet.id]: http(),
     [mainnet.id]: http(),
   },
 })

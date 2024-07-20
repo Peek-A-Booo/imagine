@@ -42,6 +42,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
 import { cn } from '@/lib/utils'
+import { MintToNFT, useMintToNFT } from '@/modules/mintToNFT'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 
@@ -64,7 +65,6 @@ const formSchema = z.object({
 export default function Generate({ model, models }: GenerateProps) {
   const account = useAccount()
   const { openConnectModal } = useConnectModal()
-
   const [loadingGenerate, setLoadingGenerate] = useState(false)
   const [loadingUpload, setLoadingUpload] = useState(false)
   const [showRecommend, setShowRecommend] = useState(false)
@@ -77,6 +77,7 @@ export default function Generate({ model, models }: GenerateProps) {
   })
   const [info, setInfo] = useState<any>(null)
   const [transactionId, setTransactionId] = useState('')
+  const { loading: loadingMintNFT } = useMintToNFT()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,9 +91,6 @@ export default function Generate({ model, models }: GenerateProps) {
       seed: '-1',
     },
   })
-  useEffect(() => {
-    getModelData()
-  }, [])
 
   const onSubmit = async () => {
     setResult({ url: '', width: 0, height: 0 })
@@ -190,6 +188,11 @@ export default function Generate({ model, models }: GenerateProps) {
       setShowRecommend(true)
     }
   }
+
+  useEffect(() => {
+    getModelData()
+  }, [])
+
   return (
     <div>
       <div className="md:3/4 grid w-full grid-cols-3 gap-4 py-4 md:grid-cols-4 lg:w-4/5">
@@ -405,27 +408,15 @@ export default function Generate({ model, models }: GenerateProps) {
               Submit
             </Button>
             {!!result.url && (
-              <Button
-                className={cn({ 'gap-2': !loadingUpload })}
-                variant="outline"
-                disabled={loadingUpload}
-                onClick={onUpload}
-              >
-                {loadingUpload ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Image
-                    src="/gateway.svg"
-                    alt="gateway"
-                    width={26}
-                    height={26}
-                  />
-                )}
-                Upload to Gateway
-              </Button>
-            )}
-            {!!result.url && (
               <>
+                <MintToNFT url={info.url} model={model}>
+                  <Button variant="outline" disabled={loadingMintNFT}>
+                    {loadingMintNFT && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Mint to NFT
+                  </Button>
+                </MintToNFT>
                 <div className="hidden gap-2 md:flex">
                   <Link href={result.url}>
                     <Button variant="outline">Download</Button>
@@ -455,6 +446,24 @@ export default function Generate({ model, models }: GenerateProps) {
                   >
                     <span>Share on</span>
                     <span className="i-ri-twitter-x-fill h-4 w-4" />
+                  </Button>
+                  <Button
+                    className={cn({ 'gap-2': !loadingUpload })}
+                    variant="outline"
+                    disabled={loadingUpload}
+                    onClick={onUpload}
+                  >
+                    {loadingUpload ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Image
+                        src="/gateway.svg"
+                        alt="gateway"
+                        width={26}
+                        height={26}
+                      />
+                    )}
+                    Upload to Gateway
                   </Button>
                 </div>
                 <DropdownMenu>
@@ -502,11 +511,20 @@ export default function Generate({ model, models }: GenerateProps) {
                         <span className="i-ri-twitter-x-fill h-4 w-4" />
                       </div>
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={onUpload}>
+                      Upload to Gateway
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
             )}
           </div>
+          {loadingUpload && (
+            <div className="flex items-center">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Loading Upload to Gateway
+            </div>
+          )}
           {!!transactionId && (
             <div className="flex gap-2">
               <div className="flex-shrink-0 whitespace-nowrap">
